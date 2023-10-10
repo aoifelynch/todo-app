@@ -24,7 +24,7 @@ class TodoController extends Controller
      */
     public function create()
     {
-        //
+        return view ('todos.create');
     }
 
     /**
@@ -32,7 +32,26 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // dd($request);
+        // validation rules
+        $rules = [
+            'title' => 'required|string|unique:todos,title|min:2|max:150',
+            'body' => 'required|string|min:5|max:1500'
+        ];
+
+        $messages = [
+            'title.unique' => 'Your to-do title must be unique.'
+        ];
+
+        $request->validate($rules, $messages);
+
+        $todo = new Todo;
+        $todo->title = $request->title;
+        $todo->body = $request->body;
+        $todo->save();
+        return redirect()
+                ->route('todos.index')
+                ->with('status', 'Created a new To-Do!');
     }
 
     /**
@@ -40,7 +59,10 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $todo = Todo::findOrFail($id);
+        return view ('todos.show', [
+            'todo' => $todo
+        ]);
     }
 
     /**
