@@ -15,7 +15,7 @@ class TodoController extends Controller
         $todos = Todo::orderBy('created_at', 'desc')->paginate(8);
 
         return view('todos.index', [
-            'todos' => $todos
+            'todos' => $todos 
         ]);
     }
 
@@ -24,7 +24,7 @@ class TodoController extends Controller
      */
     public function create()
     {
-        return view ('todos.create');
+        return view('todos.create');
     }
 
     /**
@@ -32,15 +32,19 @@ class TodoController extends Controller
      */
     public function store(Request $request)
     {
-        // dd($request);
-        // validation rules
-        $rules = [
-            'title' => 'required|string|unique:todos,title|min:2|max:150',
-            'body' => 'required|string|min:5|max:1500'
-        ];
+        
+        // dd($request->title);
 
+        //validation rules
+        $rules = [
+            'title' => 'required|string|unique:todos,title|min:2|max:150', //Cheks that the title isnt the same as another title
+            'body' => 'required|string|min:5|max:1000',
+
+        ];
+        ////////
+        
         $messages = [
-            'title.unique' => 'Your to-do title must be unique.'
+            'title.unique' => 'Todo title should be unique'
         ];
 
         $request->validate($rules, $messages);
@@ -49,9 +53,11 @@ class TodoController extends Controller
         $todo->title = $request->title;
         $todo->body = $request->body;
         $todo->save();
+
         return redirect()
                 ->route('todos.index')
-                ->with('status', 'Created a new To-Do!');
+                ->with('status', 'Created a new Todo!');
+
     }
 
     /**
@@ -59,8 +65,9 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        $todo = Todo::findOrFail($id);
-        return view ('todos.show', [
+        $todo = Todo::FindOrFail($id);
+        
+        return view('todos.show', [
             'todo' => $todo
         ]);
     }
@@ -70,7 +77,11 @@ class TodoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $todo = Todo::FindOrFail($id);
+
+        return view('todos.edit', [
+            'todo' => $todo
+        ]);
     }
 
     /**
@@ -78,7 +89,32 @@ class TodoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        
+        // dd($request->title);
+
+        //validation rules
+        $rules = [
+            'title' => "required|string|unique:todos,title,{$id}|min:2|max:150", //Cheks that the title isnt the same as another title
+            'body' => 'required|string|min:5|max:1000',
+
+        ];
+        ////////
+        
+        $messages = [
+            'title.unique' => 'Todo title should be unique'
+        ];
+
+        $request->validate($rules, $messages);
+
+        $todo = Todo::FindOrFail($id);
+        $todo->title = $request->title;
+        $todo->body = $request->body;
+        $todo->save();
+
+        return redirect()
+                ->route('todos.index')
+                ->with('status', 'Updated To-do!');
+
     }
 
     /**
@@ -86,6 +122,9 @@ class TodoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $todo = Todo::findOrFail($id);
+        $todo->delete();
+
+        return redirect()->route('todos.index')->with('status', 'To-do deleted successfully');
     }
 }
